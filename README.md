@@ -57,7 +57,7 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
 
    ![Subrede-2.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Subrede-2.png)
 
-   > **⚠️ Atenção:** Utilizei duas AZ´s públicas pois irei utilizar um ALB para que consiga distríbuir de maneira equílibrada o tráfego entre os recursos, e para que essa criação seja feita, o mínimo de AZ´s necesárias para se criar e associar o ALB em uma sub-rede são duas.
+   > **⚠️ Atenção:** Utilizei duas AZ´s públicas pois irei utilizar um ALB para que consiga distríbuir de maneira equílibrada o tráfego entre os recursos. 
 ---
 
 3. Route Table
@@ -91,8 +91,16 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
    ![Criação-EC2.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Cria%C3%A7%C3%A3o-EC2.png)
    
   - Escolhi uma Amazon linux 2, t2. micro pois será um servidor de pequeno porte para testes
+---
+
+5.1 O que é um Security Group 
+   - Security group é um firewall a nível de host, utilizado para criar, controlar e filtrar acesso aos seus recursos
+  - Para que seja liberado o acesso aos recursos, deve-se liberar portas específicas de acesso
+  - POdemos utilizar porta 80 (http) ou 443 (https) que são usadas normalmente em web sites, ou utilizar porta 22 (ssh) para que podemos ter acesso de qualquer lugar do mundo, sendo segura e criptografada.
+  - SG é statefull, onde armazena os dados(informações) do acessos que tráfegam e passam por ele. Com isso, só é necessário criar regras de entrada, e não é obrigatório criar regras de saída.
+---
     
-5.1 Configuração de rede EC2
+5.2 Configuração de rede EC2
   - escolhi minha VPC e a sub-rede que criei, onde irei implementar minha instância
   - Criei um Security Group que permite tráfego de todo os lugares (0.0.0.0/0)
    
@@ -100,7 +108,6 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
 
    > **⚠️ Atenção:** Cria um security Group que possibilita acesso de qualquer pessoa não está de acordo com as boas práticas de segurança da AWS. Essa regra torna sua VM altamente vulnerável a qualquer ataque. Utilizei essa regra para testar se minha requisição estava chegando na minha VM.
 
-  - Após a criação da primeira VM, refiz todos os passos anteriores, alterando só a sub-rede em que a outra seria implementada 
 ---
 
 6. Comunicação entre EC2 e Internet
@@ -112,6 +119,63 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
    > **⚠️ Atenção:** Por essa instância estar sendo criada em uma sub-rede pública, automaticamente ela terá um endereçamento IP Público, onde será redirecionado o tráfego da internet
    
    ![Concluído-EC2-1.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Conclu%C3%ADdo-EC2-1.png) 
+
+  - Após a criação da primeira VM, refiz todos os passos anteriores, alterando só a sub-rede em que a outra seria implementada 
+---
+
+7. ALteração do Security Group
+  - Após o teste ser um sucesso, consguindo me comunicar com a VM, alterei as regras do SG
+  - Como criei uma VM para Web Sites, liberei as portas 80 e a 443
+
+   ![Alteração-SG.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Altera%C3%A7%C3%A3o-SG.png)
+
+   > **⚠️ Atenção:** Quando se altera alguma regra do SG, onde se tem mais de 1 instância associada a ela, esta alteração irá atingir a todos.
+---
+
+8. Target Group ALB
+  - Com as duas instâncias criadas, preciso criar um Target Group, onde irá agrupar os recursos, para que o ALB possa enviar o tráfego.
+  - Utiliza-se de portas e protocolos para que seja feita o tráfego 
+  - Se pode criar diversos grupo, utilizando protocolos e portas específicas.
+
+   ![TG-WebServer.png](https://github.com/Jeff01875/Redes-AWS/blob/main/TG-WebServer.png)
+
+9. Criação do ALB (Application Load Balancer)
+  - ALB é um balanceador de carga que trabalha na camada 7, do modelo OSI
+  - Utilizado para workloads de Web Site, onde se utiliza, e distribui tráfegos de HTTP e HTTPS
+  - Consegue distribuir o tráfego para EC2, Containers, Endereço IP
+  - ELe faz a verificação de integridade dos recursos para que consiga direcionar tráfego para recursos integros
+  - Utiliza de Listeners para que consiga filtrar o tráfego que seja compátivel e distribuí-lo
+
+   ![Criação-ALB.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Cria%C3%A7%C3%A3o-ALB.png)
+
+10. Mapa do ALB
+  - Através do mapa, podemos visualizar de modo amigável a rota que o ALB faz até cheegar ao recursos
+  - Conseguimos ver se os recursos estão integros, conseguindo assim, receber o tráfego
+
+   ![Mapa-ALB.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Mapa-ALB.png)
+
+   > **⚠️ Atenção:** Quando a criação do ALB é concluída, ele fornece uma URL, que será por lá que teremos que utilizar par acessar o web site
+
+10.1 Teste do ALB 
+  - Eu copiei a URL e inseri em minha barra de pesquisa
+
+   ![Test-ALB.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Test-ALB.png)
+
+---
+
+11. Criação WAF (Web Application Firewall)
+  - WAF é um firewall que trabalha com serviços que recebem tráfego HTTP e HTTPS como: ELB, CloudFront, API Gateway e outros...
+  - Utilizado para controlar, monitorar, bloquear ou permitir acesso de endereço ip, tráfego malíciosos, SQL Inject e outros
+  - Ele pode utilizar de regras que bloqueiam acesso através de geolocalização
+  - Permiti uma visualização amigável de tráfego que sua aplicação teve, qual origem do acesso.
+
+   ![WAF-Conjunto-ip.png](https://github.com/Jeff01875/Redes-AWS/blob/main/WAF-Conjunto-ip.png)
+
+   > **⚠️ Atenção:** Iníciei a criação das minhas regras pelo Conjunto IP. Com ele, podemos inserir endereços IP´s específicos para que sejam bloqueados. É utilizado em cenários que já sabe os endereços IP´s malíciosos. Utilizei meu próprio endereço IP para que seja feito o teste.
+
+  
+    
+   
    
 
 
