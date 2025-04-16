@@ -311,7 +311,37 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
     ![Server_WEAST.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Server_WEAST.png)
 
   - Criei um SG básico, onde permito que minha instância que está na US-EAST tenha acesso à que está na US-WEST
-  - Coloquei a regra de ICMP, permitindo que eu consiga testar o ping de uma máquina para outra, verificando se a comunicação está sendo bem sucedida 
+  - Coloquei a regra de ICMP, permitindo que eu consiga testar o ping de uma máquina para outra, verificando se a comunicação está sendo bem sucedida
+  - Implementei o Endereço IP privado da minha VM 10.1.1.164/32
+
+14.6 NACL
+  - Netorking Acess List é um firewall À nível de sub-redes
+  - Utilizado támbem como Controle, filtro de tráfego aos seus recursos dentro de uma sub-rede
+  - Ele é um firewall Stateless, não armazenando os dados do tráfego. E permintdo criar regras de permissão ou bloqueio de acesso
+  - Deve-se criar regras de entrada e saida do tráfego, garantindo uma segurança e filtragem total.
+  - O SG e o NACL é uma dupla poderosa, fltrando muito bem requisições.
+
+   ![NACL-WEST.png](https://github.com/Jeff01875/Redes-AWS/blob/main/NACL-WEST.png)
+   
+   ![test- ec2 EAST--WEST.png](https://github.com/Jeff01875/Redes-AWS/blob/main/test-%20ec2%20EAST--WEST.png)
+
+14.7 Alteração de regras NACL
+  - Criei uma regra para bloquear qualquer requisição de icmp vinda do meu endereço ip 10.1.1.164/32
+
+    ![PING-NACL.png](https://github.com/Jeff01875/Redes-AWS/blob/main/PING-NACL.png)
+
+  - Depois da alteração, não conseguir ter uma comunicação ping
+---
+
+## **Conclusão do Projeto**
+
+  1. Com este projeto consegui ter uma arquitetura com maior segurança, garantindo que meus recursos só sejam acessados por portas que confio
+  2. Regar logs para analise posteriores em caso de alteração ou alguma tentativa de acesso malíciosa
+  3. Garantir uma workload alta dispolibilida e distribuição de tráfego de modo equilíbrada e verificando a integridade dos recursos
+  4. Conexão segura, criptografada e privada entre VPC para tranferência de dados
+  5. Comunicação Internal entre recursos, garantindo que essa comunicação não saía para internet.
+
+  
      
        
 
