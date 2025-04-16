@@ -169,7 +169,7 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
   - Ele pode utilizar de regras que bloqueiam acesso através de geolocalização
   - Permiti uma visualização amigável de tráfego que sua aplicação teve, qual origem do acesso.
 
-   ![WAF-Conjunto-ip.png](https://github.com/Jeff01875/Redes-AWS/blob/main/WAF-Conjunto-ip.png)
+   
 
    > **⚠️ Atenção:** Iníciei a criação das minhas regras pelo Conjunto IP. Com ele, podemos inserir endereços IP´s específicos para que sejam bloqueados. É utilizado em cenários que já sabe os endereços IP´s malíciosos. Utilizei meu próprio endereço IP para que seja feito o teste.
 
