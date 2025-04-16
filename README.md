@@ -3,7 +3,7 @@ Este projeto foi criado com serviços como: EC2, S3, VPC Peering, Endpoint Gatew
 
 ## **Diagrama do projeto**
 
-   ![diagrama.png](https://github.com/Jeff01875/Redes-AWS/blob/main/diagrama.png)
+   ![diagrama.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Diagrama-Redes.jpg)
 
 ## Descrição do projeto
 
