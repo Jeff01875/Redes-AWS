@@ -14,7 +14,7 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
 
 1. **VPC( Virtual Private Cloud )**
  - Ambiente virtual privado
- - Se cria para ter um amibiente seguro, privado e isolado lógicamente para que usuários consigam criar seus recursos dentro dele
+ - Se cria para ter um ambiente seguro, privado e isolado lógicamente para que usuários consigam criar seus recursos dentro dele
 
 2. **SUb-redes**
  - São intervalos de endereço IP dentro da VPC
@@ -31,7 +31,7 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
   - Conexão segura, privada e criptografada entre eles
   - Muito utilizado em cenários onde Algumas VPC´s precisam de comunicação para tranferencia dados e acesso a recursos em outra conta, região...
 
-5. **WAF (Web Application Firewall)
+5. **WAF (Web Application Firewall)**
   - Serviço de firewall a nível WEB, garantindo controle e permitindo acesso de usúarios, portas de acesso, endereços IP desejados
   - Possibilita criar regras onde podemos bloquear ou permitir tráfego
   - Utilizado contra SQL Inject, Dos e outros tráfegos malíciosos
@@ -169,9 +169,154 @@ Criar um ambiente seguro, que filtre, controle e monitore todo o tráfego direci
   - Ele pode utilizar de regras que bloqueiam acesso através de geolocalização
   - Permiti uma visualização amigável de tráfego que sua aplicação teve, qual origem do acesso.
 
-   
+   ![WAF-Conjunto-ip.png](https://github.com/Jeff01875/Redes-AWS/blob/main/WAF-Conjunto-ip.png)
 
    > **⚠️ Atenção:** Iníciei a criação das minhas regras pelo Conjunto IP. Com ele, podemos inserir endereços IP´s específicos para que sejam bloqueados. É utilizado em cenários que já sabe os endereços IP´s malíciosos. Utilizei meu próprio endereço IP para que seja feito o teste.
+
+11.1 Criação da ACL WAF
+  - ACL WAF é utilizada associar a regra criada e determinar se a requisição daquele endereço IP terá acesso
+
+   ![WAF-acl-1.png](https://github.com/Jeff01875/Redes-AWS/blob/main/WAF-acl-1.png)
+
+11.2 Parte 2 
+
+   ![WAF-ACL-2.png](https://github.com/Jeff01875/Redes-AWS/blob/main/WAF-ACL-2.png)
+
+11.3 Teste do WAF
+  - Depois de configurar a ACL, devo testar novamente o acesso a instância
+
+   ![test-bloq-WAF.png](https://github.com/Jeff01875/Redes-AWS/blob/main/test-bloq-WAF.png)
+
+   > **⚠️ Atenção:** A comprovação de que se o WAF está realmente funcionando corretamente é através do 403. Ele afirma que o usuário está bloqueado, que não tem acesso ao recurso desejado.
+
+11.4 Exclusão da ACL 
+  - Irei excluir A ACL para que eu consiga testar o acesso as instâncias sem nenhuma regra do WAF
+
+   ![excluir-conjunto-ip.png](https://github.com/Jeff01875/Redes-AWS/blob/main/excluir-conjunto-ip.png)
+
+11.5 Após exclusão do Conjunto IP 
+
+   ![apos-exclusão-conjunto-ip.png](https://github.com/Jeff01875/Redes-AWS/blob/main/apos-exclus%C3%A3o-conjunto-ip.png)
+
+  - O resultado é a retomada do acesso novamente as instâncias.
+  - Não se deve excluir regras que protegem seus recursos, porque fará com que sua workload esteja exposta a qualquer tráfego indesejado.
+---
+
+12. VPC Flow Logs
+  - Este serviço é utilizado para fornecer logs do tráfego que acessam sua vpc, EC2, ENI
+  - Utilizado para monitorar quais acesso passam por sua vpc
+  - através dele, podemos identificar supostos tráfego malíciosos
+  - Permiti criar Bucket, utilizar o CLoudWatch como fluxo de logs
+
+12.1 Criação de um BUcket no S3
+  - Utilizado para armazenar objetos como: logs, iamgens, documentos, músicas entre outros
+  - Fornece alta disponibilidade para seus objetos, replicando entre diversas Availability Zone. Mas isso irá depender da classe que irá desejar para sua Bucket
+  - Todas as Buckets utilizam de alguma criptografia.
+  - Também pode ser utilizado para criar Sites Estáticos
+
+   ![Criação-bucket.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Cria%C3%A7%C3%A3o-bucket.png)
+
+   > **⚠️ Atenção:** Criei uma bucket que não está acessível para internet. As configurações dela são padrão, a classe eu deixei STARDART pois farei um teste e não terá um volume enorme de tentativas de acesso aos logs
+
+12.2. Criação do VPC Flow Logs 
+  - Após a criação da bucket, eu copiei a ARN daquela bucket pois irei utilizada para criar um fluxo de logs
+  - Configurei o Flow Logs para gerar logs sobre todo o tráfego que entra e saí da vpc
+
+   ![VPC-Flow-Logs.png](https://github.com/Jeff01875/Redes-AWS/blob/main/VPC-Flow-Logs.png)
+
+12.3 Logs armazenados no Bucket
+
+   ![logs-vpc-flow-logs.png](https://github.com/Jeff01875/Redes-AWS/blob/main/logs-vpc-flow-logs.png)
+   
+   > **⚠️ Atenção:** Demora um pouco até que os logs sejam armazenados no bucket
+---
+
+13. Criação do Endpoint Gateway
+  - Endpoint Gateway é utilizado para que recursos que precisam se comunicar, transferir dados sem que essa comunicação seja feita via internet
+  - Ele é criado para serviços que trabalham na camada pública, como: S3, DynamoDB
+  - Essa comunicação é internal, garantindo a segurança dos dados e a comunicação feita
+
+   ![endpoint-gateway.png](https://github.com/Jeff01875/Redes-AWS/blob/main/endpoint-gateway.png)
+
+   > **⚠️ Atenção:** Escolhi o S3 para criar essa comunicação internal. Tive que escolher a Route Table que será usada para criar essa rota. Endpoint Gateway foi criado para recursos que estão em sub-redes privadas, onde não tem comunicação com a internet. Com esse recurso, essa comunicação pode ser feita. Utilizei minha RT pública para ter acesso ao S3 sem precisar usar a internet. Não é o recomendado, porém, utilizei esse método para fins de teste.
+
+13.1 Conclusão da criação 
+
+   ![endpoint-complete.png](https://github.com/Jeff01875/Redes-AWS/blob/main/endpoint-complete.png)
+
+   > **⚠️ Atenção:** Com a criação do Endpoint Gateway, será criada uma rota nova em sua RT, onde ela fará essa comunicação
+
+13.2 criação de IAM ROLE
+  - Para que minhas instância tenha acesso ao bucket, preciso criar uma policy e associa-lá
+  - Role é utilizada para controlar e criar policys de permissão que serão associadas aos recursos
+  - Recursos que precisam se comunicar com outros precisam associar uma role que tenha permissões específicas
+
+   ![EC2-role.png](https://github.com/Jeff01875/Redes-AWS/blob/main/EC2-role.png) 
+
+   > **⚠️ Atenção:** Utilizei uma role com policy altamente permissiva. Isso não está de acordo com as boas práticas da AWS. Caso sua máquina seja invadida, o invasor terá acesso total aos recursos em que a Role esteja permintindo. Este projeto foi criado para teste, com isso, eu decidi utilizar uma policy permissiva. Mas não está de acordo com as boas práticas.
+
+13.3 Associando à role 
+  - Fui até minhas intâncias, escolhi minha primeira VM criada, modifiquei funções IAM e associei a Role
+
+   ![associando-role.png](https://github.com/Jeff01875/Redes-AWS/blob/main/associando-role.png)
+
+13.4 Teste de listagem de objetos 
+
+   ![ec2-list-s3.png](https://github.com/Jeff01875/Redes-AWS/blob/main/ec2-list-s3.png)
+
+  - Utilizei o Comando Sudo Su para que tive acesso adm
+  - Logo em seguida, utilizei o comando AWS s3 ls para que seja listado todo conteúdo dentro da bucket
+---
+
+14. VPC Peering
+  - Serviço de permiti conectar VPC´s e se comunicarem de maneira privada e segura, utilizando criptografia durante a tranferência de dados
+  - Utilizado quando se tem uma ou mais VPC´s que precisam se comunicar entre si
+  - Não precisa de VPN para que seja feita uma comunicação segura e criptografa. O Peering utiliza da própria infraestrutura para que essa conexão e comunicação seja feita
+  - Não é indicado quando se tem muitas VPC´s, pois se pode se tornar complexa a criação dessas conexões
+
+14.1 Criação do Peering 
+  - Devo criar uma VPC em outra região. escolhi criar na US-WEST-1
+  - E logo em seguida criei uma sub-rede privada.
+
+    ![VPC-US-West.png](https://github.com/Jeff01875/Redes-AWS/blob/main/VPC-US-West.png)
+
+14.2 Route Table Priv
+  - Criei uma tabela de rotas para minha sub-rede. Com ela, criarei uma rota manualmente para a outra VPC que está na US-EAST-1
+
+    ![RT-US-West.png](https://github.com/Jeff01875/Redes-AWS/blob/main/RT-US-West.png)
+
+14.3 Emparelhamento de VPC´s 
+  - Tive que acessar minha VPC que se encontra na região US-EAST-1 e enviar a solicitação para a VPC da Região US-WEST-1
+
+   ![Emparelhamento-VPC´s.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Emparelhamento-VPC%C2%B4s.png)
+
+  - Após a solicitação, retorno para a região US-WEST, vou até emparelhamento e aceito o emparelhamento
+
+    ![Confirmar-emparelhamento.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Confirmar-emparelhamento.png)
+
+ 14.4 Criação de rotas
+   - Feito a conexão entre as VPC, precisa criar rotas específicas.
+   - Essas rotas devem ser criadas manualmente e utuilizando os endereços ip de cada VPC
+   - Iniciei a criação da rota da região de US-EAST para US-WEST
+
+     ![RT-EAST -- WEST.png](https://github.com/Jeff01875/Redes-AWS/blob/main/RT-EAST%20--%20WEST.png)
+
+   - E por fim, criei a rota de US-WEST para US- EAST
+
+     ![RT- WEST -- EAST.png](https://github.com/Jeff01875/Redes-AWS/blob/main/RT-%20WEST%20--%20EAST.png)
+
+14.5 Criação de Instância
+  - Criei uma VM para que eu consiga testa a conectividade de uma instância para outra
+
+    ![Server_WEAST.png](https://github.com/Jeff01875/Redes-AWS/blob/main/Server_WEAST.png)
+
+  - Criei um SG básico, onde permito que minha instância que está na US-EAST tenha acesso à que está na US-WEST
+  - Coloquei a regra de ICMP, permitindo que eu consiga testar o ping de uma máquina para outra, verificando se a comunicação está sendo bem sucedida 
+     
+       
+
+   
+    
 
   
     
